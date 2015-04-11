@@ -1,0 +1,23 @@
+{
+"nodes":[
+	{"id": "n1", "label": "Jose"},
+	{"id": "n2", "label": "Maria"},
+	{"id": "n3", "label": "Carlos"},
+	{"id": "n4", "label": "Alice"},
+	{"id": "n5", "label": "Bianca"},
+	{"id": "n6", "label": "Diego"},
+	{"id": "n7", "label": "Helen"},
+	{"id": "n8", "label": "Elimar"}
+],
+"edges":[
+	{"id": "e1", "source": "n1", "target": "n2"},
+	{"id": "e2", "source": "n3", "target": "n1"},
+	{"id": "e3", "source": "n3", "target": "n2"},
+	{"id": "e4", "source": "n4", "target": "n1"},
+	{"id": "e5", "source": "n4", "target": "n2"},
+	{"id": "e6", "source": "n5", "target": "n1"},
+	{"id": "e7", "source": "n5", "target": "n2"},
+	{"id": "e8", "source": "n6", "target": "n5"},
+	{"id": "e9", "source": "n7", "target": "n5"},
+	{"id": "e10", "source": "n8", "target": "n5"}
+]}

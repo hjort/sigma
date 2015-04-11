@@ -1,0 +1,96 @@
+<html>
+<head>
+<style type="text/css">
+	#graph-container {
+		max-width: 100%;
+		height: 100%;
+		margin: auto;
+	}
+</style>
+</head>
+<body>
+<div id="graph-container"></div>
+<script src="js/sigma.min.js"></script>
+<script src="js/plugins/sigma.parsers.json.min.js"></script>
+<script src="js/plugins/sigma.layout.forceAtlas2.min.js"></script>
+<script>
+	// http://stackoverflow.com/questions/21795125/json-is-not-read-by-sigma-js
+
+	// these are just some preliminary settings 
+	var g = {
+		nodes: [],
+		edges: []
+	};
+
+	// create new Sigma instance in graph-container div (use your div name here) 
+	s = new sigma({
+		graph: g,
+		container: 'graph-container',
+		renderer: {
+			container: document.getElementById('graph-container'),
+			type: 'canvas'
+		},
+		settings: {
+			defaultNodeColor: '#ec5148',
+			minNodeSize: 8,
+			maxNodeSize: 16,
+			doubleClickEnabled: false
+		}
+	});
+	//alert(s);
+
+	var colors = [
+		'#617db4',
+		'#c6583e',
+		'#b956af',
+		'#668f3c'
+	];
+
+	// first you load a JSON with s parameter to refer to the sigma instance   
+	sigma.parsers.json(
+		'ex4.json',
+		s,
+		function() {
+			// this below adds x, y attributes as well as size = degree of the node
+			s.graph.nodes().forEach(function(node) {
+				node.x = Math.random();
+				node.y = Math.random();
+				node.size = s.graph.degree(node.id);
+				node.color = colors[node.sexo - 1];
+			});
+			/*
+			var i, nodes = s.graph.nodes(), len = nodes.length;
+			for (i = 0; i < len; i++) {
+				nodes[i].x = Math.random();
+				nodes[i].y = Math.random();
+				nodes[i].size = s.graph.degree(nodes[i].id);
+				nodes[i].color = colors[nodes[i].sexo - 1];
+				//nodes[i].color = nodes[i].center ? '#333' : '#666';
+			}
+			*/
+
+			/*var edges = s.graph.edges(), len2 = edges.length;
+			for (i = 0; i < len2; i++) {
+				edges[i].size = 5;
+				edges[i].color = colors[Math.floor(Math.random() * colors.length)];
+			}
+			s.graph.edges().forEach(function(e) {
+				e.color = colors[Math.floor(Math.random() * colors.length)];
+			});*/
+
+			// refresh the display
+			s.refresh();
+
+			// ForceAtlas layout
+			s.startForceAtlas2();
+		}
+	);
+
+	// bind the events
+	s.bind('doubleClickNode rightClickNode', function(e) {
+		alert("[" + e.data.node.label + "]");
+		console.log(e.type, e.data.node.label, e.data.captor);
+	});
+</script>
+</body>
+</html>
