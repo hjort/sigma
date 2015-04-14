@@ -1,0 +1,100 @@
+<html>
+<head>
+<style type="text/css">
+#graph-container {
+	max-width: 100%;
+	height: 100%;
+	margin: auto;
+}
+</style>
+</head>
+<body>
+<div id="graph-container"></div>
+<script src="js/jquery-1.11.2.min.js"></script>
+<script src="js/sigma.min.js"></script>
+<script src="js/plugins/sigma.parsers.json.min.js"></script>
+<script src="js/plugins/sigma.layout.forceAtlas2.min.js"></script>
+<script>
+var g = {
+	nodes: [],
+	edges: []
+};
+
+// http://yomguithereal.github.io/articles/node-border-renderer/
+// we gave our own name 'border' to the custom renderer
+sigma.canvas.nodes.border = function(node, context, settings) {
+	var prefix = settings('prefix') || '';
+
+	context.fillStyle = node.color || settings('defaultNodeColor');
+	context.beginPath();
+	context.arc(
+		node[prefix + 'x'],
+		node[prefix + 'y'],
+		node[prefix + 'size'],
+		0,
+		Math.PI * 2,
+		true
+	);
+
+	context.closePath();
+	context.fill();
+
+	// adding a border
+	context.lineWidth = node.borderWidth || 3;
+	context.strokeStyle = node.borderColor || '#000'; //'#fff';
+	context.stroke();
+};
+
+s = new sigma({
+	graph: g,
+	container: 'graph-container',
+	renderer: {
+		type: 'canvas',
+		container: document.getElementById('graph-container')
+	},
+	settings: {
+		minNodeSize: 8,
+		maxNodeSize: 16,
+		defaultNodeColor: '#ec5148',
+		doubleClickEnabled: false,
+		//defaultNodeType: 'border',
+		//autoRescale: false
+	}
+});
+
+var colors = [
+	'#617db4',
+	'#c6583e',
+	'#b956af',
+	'#668f3c'
+];
+
+function refreshGraph() {
+	s.graph.nodes().forEach(function(node) {
+		node.x = Math.random();
+		node.y = Math.random();
+		node.size = s.graph.degree(node.id);
+		node.color = colors[node.tipo == 1 ? node.sexo - 1 : 2];
+		node.type = 'border';
+	});
+	s.refresh();
+	s.startForceAtlas2();
+}
+
+s.bind('doubleClickNode rightClickNode', function(e) {
+	alert("[" + e.data.node.label + "]");
+	console.log(e.type, e.data.node.label, e.data.captor);
+});
+
+// http://www.w3schools.com/jquery/
+// https://github.com/jacomyal/sigma.js/wiki/Graph-API
+// http://www.w3schools.com/jquery/ajax_ajax.asp
+$(document).ready(function(){
+	$.ajax({url: "ex5.json", success: function(result){
+		s.graph.read(result);
+		refreshGraph();
+	}});
+});
+</script>
+</body>
+</html>
