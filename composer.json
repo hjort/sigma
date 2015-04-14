@@ -1,0 +1,12 @@
+{
+  "type": "application",
+  "description": "Implementações de códigos usando Neo4j do PHP (neo4jphp)",
+  "keywords": ["neo4j","graph","database","sigma","hjort"],
+  "authors": [
+    {"name": "Rodrigo Hjort", "email": "rodrigo.hjort@gmail.com", "homepage": "http://www.hjort.co"}
+  ],
+  "require": {
+    "everyman/neo4jphp": "dev-master",
+    "silex/silex": "~1.1"
+  }
+}

@@ -1,0 +1,4 @@
+{
+  "query" : "MATCH (p:SPessoa), (e:SEmpresa) RETURN p, e",
+  "params" : { }
+}
