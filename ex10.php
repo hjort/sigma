@@ -12,133 +12,38 @@ $app['debug'] = true;
 
 $neo4j = new Client();
 
+# https://github.com/neo4j-contrib/developer-resources/blob/gh-pages/language-guides/php/neo4jphp/index.php
 $app->get('/', function (Request $request) use ($neo4j) {
-	$queryTemplate = <<<QUERY
-MATCH (p:SPessoa), (e:SEmpresa) RETURN *
-QUERY;
 
-	$cypher = new Query($neo4j, $queryTemplate);
-	$results = $cypher->getResultSet();
+	$nodes = array();
+	$edges = array();
 
-	//$actors = [];
-	//$nodes = [];
-	//$edges = [];
-	foreach ($results as $result) {
-		$target = count($nodes);
-
-		var_dump($result);
-
-		/*
-		$nodes[] = array('title' => $result['movie'], 'label' => 'movie');
-
-		foreach ($result['cast'] as $name) {
-			if (!isset($actors[$name])) {
-				$actors[$name] = count($nodes);
-				$nodes[] = array('title' => $name, 'label' => 'actor');
-			}
-			$edges[] = array('id'=>, 'source' => $actors[$name], 'target' => $target);
-		}
-		*/
+	$cypher = new Query($neo4j, 'MATCH (p:SPessoa) RETURN p');
+	$result = $cypher->getResultSet();
+	foreach ($result as $row) {
+		$data = $row['data']->getProperties();
+		$nodes[] = array('id' => $data['id'], 'label' => $data['label'], 'tipo' => 1, 'sexo' => $data['sexo']);
 	}
 
-	return json_encode(array(
-		'nodes' => $nodes,
-		'edges' => $edges,
-	));
-});
-
-/*
-$app->get('/', function () {
-	return file_get_contents(__DIR__.'/static/index.html');
-});
-
-$app->get('/graph', function (Request $request) use ($neo4j) {
-	$limit = (integer)$request->get('limit', 50);
-	$queryTemplate = <<<QUERY
-MATCH (m:Movie)<-[:ACTED_IN]-(a:Person)
- RETURN m.title as movie, collect(a.name) as cast
- LIMIT {limit}
-QUERY;
-
-	$cypher = new Query($neo4j, $queryTemplate, array('limit'=>$limit));
-	$results = $cypher->getResultSet();
-
-	$actors = [];
-	$nodes = [];
-	$rels = [];
-	foreach ($results as $result) {
-		$target = count($nodes);
-		$nodes[] = array('title' => $result['movie'], 'label' => 'movie');
-
-		foreach ($result['cast'] as $name) {
-			if (!isset($actors[$name])) {
-				$actors[$name] = count($nodes);
-				$nodes[] = array('title' => $name, 'label' => 'actor');
-			}
-			$rels[] = array('source' => $actors[$name], 'target' => $target);
-		}
+	$cypher = new Query($neo4j, 'MATCH (e:SEmpresa) RETURN e');
+	$result = $cypher->getResultSet();
+	foreach ($result as $row) {
+		$data = $row['data']->getProperties();
+		$nodes[] = array('id' => $data['id'], 'label' => $data['label'], 'tipo' => 2);
 	}
 
-	return json_encode(array(
-		'nodes' => $nodes,
-		'links' => $rels,
-	));
-});
-
-$app->get('/search', function (Request $request) use ($neo4j) {
-	$searchTerm = $request->get('q');
-	$query = '(?i).*'.$searchTerm.'.*';
-	$queryTemplate = <<<QUERY
-MATCH (movie:Movie)
- WHERE movie.title =~ {query}
- RETURN movie
-QUERY;
-
-	$cypher = new Query($neo4j, $queryTemplate, array('query'=>$query));
-	$results = $cypher->getResultSet();
-
-	$movies = [];
-	foreach ($results as $result) {
-		$movies[] = array('movie' => $result['movie']->getProperties());
+	# https://github.com/jadell/neo4jphp/blob/master/examples/cypher.php
+	$cypher = new Query($neo4j, 'MATCH (a)-[:REL]->(b) RETURN a, b');
+	$result = $cypher->getResultSet();
+	$id = 1;
+	foreach ($result as $row) {
+		$data1 = $row['a']->getProperties();
+		$data2 = $row['b']->getProperties();
+		$edges[] = array('id' => 'e' . $id++, 'source' => $data1['id'], 'target' => $data2['id']);
 	}
 
-	return json_encode($movies);
+	return json_encode(array('nodes' => $nodes, 'edges' => $edges));
 });
-
-$app->get('/movie/{title}', function ($title) use ($neo4j) {
-	$queryTemplate = <<<QUERY
-MATCH (movie:Movie {title:{title}})
- OPTIONAL MATCH (movie)<-[r]-(person:Person)
- RETURN movie.title as title,
-       collect({name:person.name,
-                job:head(split(lower(type(r)),'_')),
-                role:r.roles}) as cast LIMIT 1
-QUERY;
-
-	$cypher = new Query($neo4j, $queryTemplate, array('title'=>$title));
-	$results = $cypher->getResultSet();
-	$result = $results[0];
-
-	$movie = array('title' => $result['title'], 'cast' => array());
-	foreach ($result['cast'] as $member) {
-		$castMember = array(
-			'job' => $member['job'],
-			'name' => $member['name'],
-			'role' => array(),
-		);
-
-		if ($member['role']) {
-			foreach ($member['role'] as $name) {
-				$castMember['role'][] = $name;
-			}
-		}
-
-		$movie['cast'][] = $castMember;
-	}
-
-	return json_encode($movie);
-});
-*/
 
 $app->run();
 ?>
