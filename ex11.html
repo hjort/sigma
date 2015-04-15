@@ -9,11 +9,13 @@
 </style>
 </head>
 <body>
-<div><input type="button" id="layout" value="Refresh Layout"/></div>
+<!--<div><input type="button" id="layout" value="Refresh Layout"/></div>-->
 <div id="graph-container"></div>
 <script src="js/jquery-1.11.2.min.js"></script>
 <script src="js/sigma.min.js"></script>
 <script src="js/plugins/sigma.layout.forceAtlas2.min.js"></script>
+<!--<script src="js-src/plugins/sigma.layout.forceAtlas2/worker.js"></script>
+<script src="js-src/plugins/sigma.layout.forceAtlas2/supervisor.js"></script>-->
 <script>
 var g = {
 	nodes: [],
@@ -70,23 +72,32 @@ var colors = [
 ];
 
 function refreshGraph() {
-	var i = 0;
+	//console.log("Refreshing graph...");
+
+	s.killForceAtlas2();
+	//if (s.isForceAtlas2Running())
+	//	s.stopForceAtlas2();
+
+	var i = 1;
 	s.graph.nodes().forEach(function(node) {
-		node.x = Math.cos(i); //Math.random();
-		node.y = Math.sin(i); //Math.random();
+		node.x = Math.cos(Math.PI * 2 / i); //Math.random();
+		node.y = Math.sin(Math.PI * 2 / i); //Math.random();
 		node.size = s.graph.degree(node.id);
 		node.color = colors[node.tipo == 1 ? node.sexo - 1 : 2];
 		node.type = 'border';
 		i += 0.1;
+		//console.log(node);
 	});
 	s.refresh();
+
+	//s.killForceAtlas2();
 	s.startForceAtlas2();
+	setInterval(function() {s.stopForceAtlas2();}, 500);
 }
 
 function reloadFromNode(code) {
-	console.log("Reloading from node " + code + "...");
-	$.ajax({url: "ex11.php?start=" + code, dataType: "json", success: function(result){
-		//console.log(result);
+	console.log("Reloading from node '" + code + "'...");
+	$.ajax({url: "ex11.php?start=" + code, dataType: "json", success: function(result) {
 		var g = s.graph;
 		g.clear();
 		g.read(result);
@@ -105,13 +116,16 @@ s.bind('clickNode', function(e) {
 // https://github.com/jacomyal/sigma.js/wiki/Graph-API
 // http://www.w3schools.com/jquery/ajax_ajax.asp
 // http://api.jquery.com/jquery.ajax/
-$(function(){
+$(function() {
 	reloadFromNode('n1');
-	$("#layout").click(function(){
-		//refreshGraph();
-        //s.startForceAtlas2();
-		//s.stopForceAtlas2();
-    });
+	$("#layout").click(function() {
+		if (s.isForceAtlas2Running())
+			s.stopForceAtlas2();
+		else {
+			s.killForceAtlas2();
+			s.startForceAtlas2();
+		}
+	});
 });
 </script>
 </body>
