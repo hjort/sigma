@@ -70,12 +70,14 @@ var colors = [
 ];
 
 function refreshGraph() {
+	var i = 0;
 	s.graph.nodes().forEach(function(node) {
-		node.x = Math.random();
-		node.y = Math.random();
+		node.x = Math.cos(i); //Math.random();
+		node.y = Math.sin(i); //Math.random();
 		node.size = s.graph.degree(node.id);
 		node.color = colors[node.tipo == 1 ? node.sexo - 1 : 2];
 		node.type = 'border';
+		i += 0.1;
 	});
 	s.refresh();
 	s.startForceAtlas2();
