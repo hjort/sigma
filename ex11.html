@@ -78,14 +78,13 @@ function refreshGraph() {
 	//if (s.isForceAtlas2Running())
 	//	s.stopForceAtlas2();
 
-	var i = 1;
-	s.graph.nodes().forEach(function(node) {
-		node.x = Math.cos(Math.PI * 2 / i); //Math.random();
-		node.y = Math.sin(Math.PI * 2 / i); //Math.random();
+	// http://www.tweetegy.com/2014/07/network-data-visualization-graph-using-sigmajs/
+	s.graph.nodes().forEach(function(node, i, a) {
+		node.x = Math.cos(Math.PI * 2 * i / a.length);
+		node.y = Math.sin(Math.PI * 2 * i / a.length);
 		node.size = s.graph.degree(node.id);
 		node.color = colors[node.tipo == 1 ? node.sexo - 1 : 2];
 		node.type = 'border';
-		i += 0.1;
 		//console.log(node);
 	});
 	s.refresh();
