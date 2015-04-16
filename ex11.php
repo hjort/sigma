@@ -22,6 +22,7 @@ $app->get('/', function (Request $request) use ($neo4j) {
 	$nlist = array();
 	$elist = array();
 
+	// TODO: buscar também entidades do tipo SEmpresa
 	$start = $request->get('start', 'n1');//NULL);
 	//$degrees = (integer)$request->get('degrees', 3);
 	$queryTemplate = <<<QUERY
@@ -50,7 +51,7 @@ QUERY;
 			$nlist[] = $nid;
 		}
 
-		if ($row['r']->count() > 1) {
+		if ($row['r']->count() > 0) {
 			foreach ($row['r'] as $rel) {
 				$snid = $rel->getStartNode()->getId();
 				$enid = $rel->getEndNode()->getId();
@@ -64,6 +65,9 @@ QUERY;
 		}
 	}
 
+	/*print_r($nlist);
+	print_r($elist);
+	exit(0);*/
 	return json_encode(array('nodes' => $nodes, 'edges' => $edges));
 });
 

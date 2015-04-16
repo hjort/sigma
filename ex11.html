@@ -91,7 +91,7 @@ function refreshGraph() {
 
 	//s.killForceAtlas2();
 	s.startForceAtlas2();
-	setInterval(function() {s.stopForceAtlas2();}, 500);
+	setInterval(function() {s.stopForceAtlas2();}, 5000);
 }
 
 function reloadFromNode(code) {
@@ -108,7 +108,8 @@ function reloadFromNode(code) {
 s.bind('clickNode', function(e) {
 	//alert("[" + e.data.node.label + "]");
 	//console.log(e.type, e.data.node.label, e.data.captor);
-	reloadFromNode(e.data.node.cod);
+	if (e.data.node.tipo == 1)
+		reloadFromNode(e.data.node.cod);
 });
 
 // http://www.w3schools.com/jquery/
@@ -117,14 +118,14 @@ s.bind('clickNode', function(e) {
 // http://api.jquery.com/jquery.ajax/
 $(function() {
 	reloadFromNode('n1');
-	$("#layout").click(function() {
+	/*$("#layout").click(function() {
 		if (s.isForceAtlas2Running())
 			s.stopForceAtlas2();
 		else {
 			s.killForceAtlas2();
 			s.startForceAtlas2();
 		}
-	});
+	});*/
 });
 </script>
 </body>
