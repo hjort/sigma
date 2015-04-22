@@ -1,0 +1,95 @@
+-- zerar banco de dados
+
+MATCH (n:Pessoa)
+OPTIONAL MATCH (n)-[r]-()
+DELETE n, r
+
+MATCH (n:Empresa)
+OPTIONAL MATCH (n)-[r]-()
+DELETE n, r
+
+MATCH (n:BO)
+OPTIONAL MATCH (n)-[r]-()
+DELETE n, r
+
+
+-- rede de pessoas
+
+CREATE
+(a:Pessoa {id: "12345678901", nome: "João da Silva", sexo: "M"}),
+(b:Pessoa {id: "15975315945", nome: "Maria Gomes da Silva", sexo: "F"}),
+(c:Pessoa {id: "98732154124", nome: "José da Silva Filho", sexo: "M"}),
+(d:Pessoa {id: "65478512547", nome: "Julia Gomes da Silva", sexo: "F"}),
+(e:Pessoa {id: "95175632010", nome: "Amanda de Souza da Silva", sexo: "F"}),
+(f:Pessoa {id: "65487512187", nome: "José da Silva Neto", sexo: "M"}),
+(g:Pessoa {id: "15457212478", nome: "Maria de Souza da Silva", sexo: "F"}),
+(h:Pessoa {id: "65475124788", nome: "Raimundo Nonato de Lima", sexo: "M"}),
+(a)-[:CONJUGE]->(b),
+(c)-[:FILHO]->(a),(c)-[:FILHO]->(b),
+(d)-[:FILHO]->(a),(d)-[:FILHO]->(b),
+(c)-[:CONJUGE]->(e),
+(f)-[:FILHO]->(c),(f)-[:FILHO]->(e),
+(g)-[:FILHO]->(c),(g)-[:FILHO]->(e),
+(d)-[:CONJUGE]->(h)
+
+CREATE CONSTRAINT ON (p:Pessoa) ASSERT p.id IS UNIQUE
+
+--MATCH (p:Pessoa) RETURN p
+
+
+-- boletim de ocorrência (BO)
+
+MATCH (a:Pessoa {id: "98732154124"}), (d:Pessoa {id: "65478512547"})
+CREATE
+(k:Pessoa {id: "95419876311", nome: "Firmino Augusto dos Santos", sexo: "M"}),
+(bo:BO {data: "20150410", hora: "120814"}),
+(a)-[:DECLARANTE]->(bo),
+(d)-[:VITIMA]->(bo),
+(k)-[:ACUSADO]->(bo)
+RETURN bo, a, d, k
+
+MATCH (k:Pessoa) WHERE k.id = "95419876311"
+CREATE
+(l:Pessoa {id: "62132445412", nome: "Severino Cavalcante de Sá", sexo: "M"}),
+(m:Pessoa {id: "98574217877", nome: "João Augusto de Sá", sexo: "M"}),
+(bo:BO {data: "20141104", hora: "190411"}),
+(l)-[:DECLARANTE]->(bo),
+(l)-[:VITIMA]->(bo),
+(m)-[:VITIMA]->(bo),
+(k)-[:ACUSADO]->(bo)
+RETURN bo, k, l, m
+
+
+-- empresas
+
+MATCH (s:Pessoa {id: "62132445412"}), (j:Pessoa {id: "65487512187"}),
+  (k:Pessoa {id: "65478512547"}), (r:Pessoa {id: "65475124788"}), (t:Pessoa {id: "98574217877"})
+CREATE
+(a:Empresa {id: "00324532000123", nome: "Lava Jato Severino"}),
+(b:Empresa {id: "00234227000154", nome: "Bar do Raimundo"}),
+(s)-[:SOCIO {participacao: 0.33}]->(a),
+(j)-[:SOCIO {participacao: 0.33}]->(a),
+(t)-[:SOCIO {participacao: 0.33}]->(a),
+(r)-[:SOCIO {participacao: 0.5}]->(b),
+(k)-[:SOCIO {participacao: 0.5}]->(b)
+RETURN a, b, s, j, t, r, k
+
+CREATE CONSTRAINT ON (e:Empresa) ASSERT e.id IS UNIQUE
+
+--MATCH (n:Pessoa), (bo:BO), (e:Empresa) RETURN n, bo, e
+
+
+-- funcionários
+
+MATCH (a:Empresa) WHERE a.id = "00324532000123"
+MATCH (b:Empresa) WHERE b.id = "00234227000154"
+CREATE
+(i:Pessoa {id: "17964325846", nome: "João Alfredo Cunha", sexo: "M"}),
+(j:Pessoa {id: "00154957651", nome: "Margarete Alves de Lima", sexo: "F"}),
+(k:Pessoa {id: "01549876541", nome: "Alberto dos Santos", sexo: "M"}),
+(i)-[:EMPREGADO {cargo: "Lavador"}]->(a),
+(j)-[:EMPREGADO {cargo: "Atendente"}]->(a),
+(k)-[:EMPREGADO {cargo: "Caixa"}]->(b)
+
+MATCH (p:Pessoa), (e:Empresa), (bo:BO) RETURN p, e, bo
+

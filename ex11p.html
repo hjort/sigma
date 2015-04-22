@@ -1,0 +1,118 @@
+<html>
+<head>
+<style type="text/css">
+#graph-container {
+	max-width: 100%;
+	height: 100%;
+	margin: auto;
+}
+</style>
+</head>
+<body>
+<div id="graph-container"></div>
+<script src="js/jquery-1.11.2.min.js"></script>
+<script src="js/sigma.min.js"></script>
+<script src="js/plugins/sigma.layout.forceAtlas2.min.js"></script>
+<script>
+var g = {
+	nodes: [],
+	edges: []
+};
+
+// http://yomguithereal.github.io/articles/node-border-renderer/
+// we gave our own name 'border' to the custom renderer
+sigma.canvas.nodes.border = function(node, context, settings) {
+	var prefix = settings('prefix') || '';
+
+	context.fillStyle = node.color || settings('defaultNodeColor');
+	context.beginPath();
+	context.arc(
+		node[prefix + 'x'],
+		node[prefix + 'y'],
+		node[prefix + 'size'],
+		0,
+		Math.PI * 2,
+		true
+	);
+
+	context.closePath();
+	context.fill();
+
+	// adding a border
+	context.lineWidth = node.borderWidth || 3;
+	context.strokeStyle = node.borderColor || '#000'; //'#fff';
+	context.stroke();
+};
+
+s = new sigma({
+	graph: g,
+	container: 'graph-container',
+	renderer: {
+		type: 'canvas',
+		container: document.getElementById('graph-container')
+	},
+	settings: {
+		minNodeSize: 8,
+		maxNodeSize: 16,
+		defaultNodeColor: '#ec5148',
+		doubleClickEnabled: false,
+		//defaultNodeType: 'border',
+		//autoRescale: false
+	}
+});
+
+var colors = [
+	'#617db4',
+	'#c6583e',
+	'#b956af',
+	'#668f3c'
+];
+
+function refreshGraph() {
+	//console.log("Refreshing graph...");
+
+	s.killForceAtlas2();
+
+	// http://www.tweetegy.com/2014/07/network-data-visualization-graph-using-sigmajs/
+	s.graph.nodes().forEach(function(node, i, a) {
+		node.x = Math.cos(Math.PI * 2 * i / a.length);
+		node.y = Math.sin(Math.PI * 2 * i / a.length);
+		node.size = s.graph.degree(node.id);
+		node.color = colors[node.tipo - 1];
+		node.type = 'border';
+		//console.log(node);
+	});
+	s.refresh();
+
+	s.startForceAtlas2();
+	setInterval(function() {s.stopForceAtlas2();}, 5000);
+}
+
+function reloadFromNode(code) {
+	console.log("Reloading from node '" + code + "'...");
+	$.ajax({url: "ex11p.php?start=" + code, dataType: "json", success: function(result) {
+		var g = s.graph;
+		g.clear();
+		g.read(result);
+		console.log('Nodes: ', g.nodes().length, 'Edges: ', g.edges().length);
+		refreshGraph();
+	}});
+}
+
+s.bind('clickNode', function(e) {
+	//alert("[" + e.data.node.label + "]");
+	//console.log(e.type, e.data.node.label, e.data.captor);
+	if (e.data.node.tipo == 1)
+		reloadFromNode(e.data.node.cod);
+});
+
+// http://www.w3schools.com/jquery/
+// https://github.com/jacomyal/sigma.js/wiki/Graph-API
+// http://www.w3schools.com/jquery/ajax_ajax.asp
+// http://api.jquery.com/jquery.ajax/
+$(function() {
+	reloadFromNode('98732154124');
+});
+</script>
+</body>
+</html>
