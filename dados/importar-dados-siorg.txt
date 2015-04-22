@@ -1,0 +1,41 @@
+# importar órgaos
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS
+FROM "http://10.11.70.147/siorg/dados/orgaos.csv" AS l
+FIELDTERMINATOR ';'
+CREATE (o:Orgao {id: toInt(l.Codigo), nome: l.Nome, sigla: l.Sigla})
+
+# criar chave primária
+CREATE CONSTRAINT ON (o:Orgao) ASSERT o.id IS UNIQUE
+
+# criar índice secundário
+CREATE INDEX ON :Orgao(sigla)
+
+# importar vínculo entre órgãos
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS
+FROM "http://10.11.70.147/siorg/dados/orgaos.csv" AS l
+FIELDTERMINATOR ';'
+MATCH (filho:Orgao {id: toInt(l.Codigo)}), (pai:Orgao {id: toInt(l.CodigoPai)})
+CREATE (filho)-[:VINCULADO]->(pai)
+
+# importar colegiados
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS
+FROM "http://10.11.70.147/siorg/dados/colegiados.csv" AS l
+FIELDTERMINATOR ';'
+MATCH (orgao:Orgao {id: toInt(l.Colegiado)})
+SET orgao :Orgao:Colegiado
+
+# importar vínculo entre colegiados
+USING PERIODIC COMMIT
+LOAD CSV WITH HEADERS
+FROM "http://10.11.70.147/siorg/dados/colegiados.csv" AS l
+FIELDTERMINATOR ';'
+MATCH (orgao:Orgao {id: toInt(l.Componente)}), (colegiado:Colegiado {id: toInt(l.Colegiado)})
+CREATE (orgao)-[:COMPONENTE]->(colegiado)
+
+# remover label de órgãos colegiados
+MATCH (c:Orgao:Colegiado)
+REMOVE c:Orgao
+
